@@ -32,8 +32,6 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
   const newBootcamp = await Bootcamp.create(req.body);
   res.status(201).json({success: true, data: newBootcamp});
-
-  next(error);
 });
 
 //@desc    Update bootcamp
