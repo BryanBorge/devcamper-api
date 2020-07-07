@@ -8,7 +8,6 @@ const ErrorReponse = require("../utils/errorResponse");
 exports.register = asyncHandler(async (req, res, next) => {
   const {name, email, password, role} = req.body;
 
-  console.log(name);
   //Create user
   const user = await User.create({
     name,
@@ -17,5 +16,8 @@ exports.register = asyncHandler(async (req, res, next) => {
     role,
   });
 
-  res.status(200).json({success: true});
+  //Create token
+  const token = user.getSignedJwtToken();
+
+  res.status(200).json({success: true, token});
 });
