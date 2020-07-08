@@ -3,6 +3,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
+const helmet = require("helmet");
+const xss = require("xss-clean");
 const fileupload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/error");
@@ -40,6 +42,12 @@ app.use(fileupload());
 
 //Sanitize data
 app.use(mongoSanitize());
+
+//Set Security headers
+app.use(helmet());
+
+//Prevent xss attacks
+app.use(xss());
 
 //Set static folder
 app.use(express.static(path.join(__dirname, "public")));
