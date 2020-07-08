@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const asyncHandler = require("../middleware/async");
+const sendEmail = require("../utils/sendEmail");
 const ErrorReponse = require("../utils/errorResponse");
 
 //@desc    Register user
@@ -67,9 +68,25 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   //Get reset token
   let resetToken = user.getResetPasswordToken();
   await user.save({validateBeforeSave: false});
-  console.log(resetToken);
 
-  res.status(200).json({success: true, data: user});
+  //Create reset url
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/resetpassword/${resetToken}`;
+
+  const message = `Please make aput request to \n\n ${resetUrl}`;
+  try {
+    sendEmail({email: user.email, subject: "Password reset token", message});
+    res.status(200).json({success: true, data: "Email sent"});
+    next();
+  } catch (error) {
+    console.log(error);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save({validateBeforeSave: false});
+    return next(new ErrorReponse("Email could not be sent", 500));
+  }
 });
 
 //Get token from model, create cookie and send response
